@@ -1,0 +1,71 @@
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+
+  nats:
+    image: nats:latest
+    volumes:
+      - "./nats:/etc/nats"
+    ports:
+      - "4222:4222"
+    command: ["-c", "/etc/nats/nats-server.conf", "-D"]
+
+  replicator:
+    image: pgflo/pg_flo:latest
+    volumes:
+      - "./pg_flo:/etc/pg_flo"
+    command: ["replicator", "--config", "/etc/pg_flo/config.yaml"]
+    environment:
+      - LOG_LEVEL=debug
+    links:
+      - nats
+      - db
+
+  worker:
+    image: pgflo/pg_flo:latest
+    volumes:
+      - "./pg_flo:/etc/pg_flo"
+    command: ["worker", "postgres", "--config", "/etc/pg_flo/config.yaml", "--routing-config", "/etc/pg_flo/routing.yaml", "--rules-config", "/etc/pg_flo/rules.yaml"]
+    links:
+      - nats
+      - webhook
+
+  #worker2:
+  #  image: pgflo/pg_flo:latest
+  #  volumes:
+  #    - "./pg_flo:/etc/pg_flo"
+  #  command:
+  #    - "worker"
+  #    - "webhook"
+  #    - "--config"
+  #    - "/etc/pg_flo/config.yaml"
+  #    - "--routing-config"
+  #    - "/etc/pg_flo/routing.yaml"
+  #    - "--rules-config"
+  #    - "/etc/pg_flo/rules.yaml"
+  #  links:
+  #    - nats
+  #    - webhook
+
+  webhook:
+    image: node:22.12.0-slim
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./webhook:/app
+    command: ["/app/index.js"]
+
+volumes:
+  postgres:

@@ -1,0 +1,30 @@
+# Replicator settings
+host: "db"
+port: 5432
+dbname: "test"
+user: "postgres"
+password: "postgres"
+group: "pg_flo"
+schema: "app"
+tables:
+  - "users"
+status-dir: "/etc/pg_flo/status"
+
+source-host: "db"
+source-dbname: "test"
+source-user: "postgres"
+source-password: "postgres"
+
+# Worker settings (postgres sink)
+target-host: "db"
+target-port: 5432
+target-dbname: "repl"
+target-user: "postgres"
+target-password: "postgres"
+
+# webhook sink
+webhook-url: "http://webhook:5000"
+
+# Common settings
+nats-url: "nats://nats:4222"
+

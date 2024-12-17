@@ -1,0 +1,5 @@
+users:
+  - type: exclude_columns
+    columns: [password]
+  - type: mask_columns
+    columns: [name]

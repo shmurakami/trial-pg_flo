@@ -1,0 +1,6 @@
+users:
+  source_table: users
+  destination_table: accounts
+  column_mappings:
+    - source: id
+      destination: account_id
